@@ -10,6 +10,7 @@ from typing import List, Tuple, Optional, Dict
 from dataclasses import dataclass
 import numpy as np
 
+
 @dataclass
 class CityProfile:
     name: str
@@ -40,6 +41,7 @@ class CityProfile:
             + self.er_injury
             + self.er_hpf
         )
+
 
 PROFILES = {
     "beijing": CityProfile(
@@ -296,18 +298,18 @@ def create_heatmap(
             ),
             hovertemplate=(
                 "<b>分配方案</b><br>"
-                "工资: %{x:,.0f} 元<br>"
+                "工资(年薪): %{x:,.0f} 元<br>"
                 "年终奖: %{y:,.0f} 元<br><br>"
                 "<b>财富组成</b><br>"
-                "真实财富: %{z:,.0f} 元<br>"
-                "  -> 纯现金: %{customdata[0]:,.0f} 元<br>"
-                "  -> 公积金: %{customdata[1]:,.0f} 元<br><br>"
+                "真实财富: %{z:,.0f} 元/年<br>"
+                "  -> 纯现金: %{customdata[0]:,.0f} 元/年<br>"
+                "  -> 公积金: %{customdata[1]:,.0f} 元/年<br><br>"
                 "<b>税费支出</b><br>"
-                "工资个税: %{customdata[2]:,.0f} 元<br>"
-                "年终奖税: %{customdata[3]:,.0f} 元<br>"
-                "企业所得税: %{customdata[4]:,.0f} 元<br>"
-                "分红个税: %{customdata[5]:,.0f} 元<br>"
-                "社保沉没: %{customdata[6]:,.0f} 元<br>"
+                "工资个税: %{customdata[2]:,.0f} 元/年<br>"
+                "年终奖税: %{customdata[3]:,.0f} 元/年<br>"
+                "企业所得税: %{customdata[4]:,.0f} 元/年<br>"
+                "分红个税: %{customdata[5]:,.0f} 元/年<br>"
+                "社保沉没: %{customdata[6]:,.0f} 元/年<br>"
                 "<extra></extra>"
             ),
         )
@@ -324,12 +326,12 @@ def create_heatmap(
             textposition="top center",
             hovertemplate=(
                 "<b>*** 最优分配方案 ***</b><br><br>"
-                "工资: %{x:,.0f} 元<br>"
+                "工资(年薪): %{x:,.0f} 元<br>"
                 "年终奖: %{y:,.0f} 元<br><br>"
-                f"真实财富: {optimal['real_liquid_wealth']:,.0f} 元<br>"
-                f"  -> 纯现金: {optimal['liquid_cash']:,.0f} 元<br>"
-                f"  -> 公积金: {optimal['total_hpf']:,.0f} 元<br><br>"
-                f"总税费: {optimal['total_tax']:,.0f} 元<br>"
+                f"真实财富: {optimal['real_liquid_wealth']:,.0f} 元/年<br>"
+                f"  -> 纯现金: {optimal['liquid_cash']:,.0f} 元/年<br>"
+                f"  -> 公积金: {optimal['total_hpf']:,.0f} 元/年<br><br>"
+                f"总税费: {optimal['total_tax']:,.0f} 元/年<br>"
                 "<extra></extra>"
             ),
         )
@@ -346,7 +348,11 @@ def create_heatmap(
 
 
 def print_optimal_summary(
-    optimal: dict, total_pool: float, deduct: float, cit_rate: float, profile: CityProfile
+    optimal: dict,
+    total_pool: float,
+    deduct: float,
+    cit_rate: float,
+    profile: CityProfile,
 ):
     print("\n" + "=" * 70)
     print(f"               最优税务统筹方案 - {profile.name} (2025版)")
@@ -355,35 +361,41 @@ def print_optimal_summary(
     print(f"  社保公积金上限:          {profile.monthly_cap * 12:>15,.0f} 元/年")
     print(f"  社保公积金下限:          {profile.monthly_floor * 12:>15,.0f} 元/年")
     print(f"\n【输入参数】")
-    print(f"  年度总盘子 (M):          {total_pool:>15,.0f} 元")
-    print(f"  专项附加扣除:            {deduct:>15,.0f} 元")
+    print(f"  年度总盘子 (M):          {total_pool:>15,.0f} 元/年")
+    print(f"  专项附加扣除:            {deduct:>15,.0f} 元/年")
     print(f"  企业所得税率:            {cit_rate:>14.0%}")
     print(f"\n【分配参数】")
-    print(f"  工资:                    {optimal['salary']:>15,.0f} 元")
+    print(f"  工资(年薪):              {optimal['salary']:>15,.0f} 元")
     print(f"  年终奖:                  {optimal['bonus']:>15,.0f} 元")
-    print(f"  公司统筹总成本:          {optimal['company_insurance']:>15,.0f} 元")
-    print(f"  剩余分红利润:            {optimal['profit']:>15,.0f} 元")
-    print(f"\n【政府税费总损耗】总计:   {optimal['total_tax']:>15,.0f} 元")
-    print(f"  工资个税(IIT):           {optimal['iit']:>15,.0f} 元")
-    print(f"  年终奖个税(BonusTax):    {optimal['bonus_tax']:>15,.0f} 元")
-    print(f"  企业所得税(CIT):         {optimal['cit']:>15,.0f} 元")
-    print(f"  分红个税(DivTax):        {optimal['div_tax']:>15,.0f} 元")
-    print(f"\n【个人真实财富】总计:     {optimal['real_liquid_wealth']:>15,.0f} 元")
-    print(f"  -> 纯现金(可自由支配):   {optimal['liquid_cash']:>15,.0f} 元")
-    print(f"  -> 公积金(可提取抵扣):   {optimal['total_hpf']:>15,.0f} 元")
+    print(f"  公司统筹总成本:          {optimal['company_insurance']:>15,.0f} 元/年")
+    print(f"  剩余分红利润:            {optimal['profit']:>15,.0f} 元/年")
+    print(f"\n【政府税费总损耗】总计:   {optimal['total_tax']:>15,.0f} 元/年")
+    print(f"  工资个税(IIT):           {optimal['iit']:>15,.0f} 元/年")
+    print(f"  年终奖个税(BonusTax):    {optimal['bonus_tax']:>15,.0f} 元/年")
+    print(f"  企业所得税(CIT):         {optimal['cit']:>15,.0f} 元/年")
+    print(f"  分红个税(DivTax):        {optimal['div_tax']:>15,.0f} 元/年")
+    print(f"\n【个人真实财富】总计:     {optimal['real_liquid_wealth']:>15,.0f} 元/年")
+    print(f"  -> 纯现金(可自由支配):   {optimal['liquid_cash']:>15,.0f} 元/年")
+    print(f"  -> 公积金(可提取抵扣):   {optimal['total_hpf']:>15,.0f} 元/年")
     print(f"\n【其他指标】")
-    print(f"  有效税率 (含社保沉没):   {((total_pool - optimal['real_liquid_wealth']) / total_pool * 100):>14.2f} %")
+    print(
+        f"  有效税率 (含社保沉没):   {((total_pool - optimal['real_liquid_wealth']) / total_pool * 100):>14.2f} %"
+    )
     print("=" * 70 + "\n")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="税务统筹计算与可视化工具 (2025 Profile版)")
+    parser = argparse.ArgumentParser(
+        description="税务统筹计算与可视化工具 (2025 Profile版)"
+    )
     parser.add_argument("-p", "--pool", type=float, default=1000000)
     parser.add_argument("-d", "--deduct", type=float, default=18000)
     parser.add_argument("-s", "--step", type=float, default=10000)
     parser.add_argument("-c", "--city", choices=PROFILES.keys(), default="beijing")
     parser.add_argument("--cit", type=float, default=DEFAULT_CIT_RATE)
-    parser.add_argument("-o", "--output", type=str, default="tax_optimization_bonus.html")
+    parser.add_argument(
+        "-o", "--output", type=str, default="tax_optimization_bonus.html"
+    )
 
     args = parser.parse_args()
     profile = PROFILES[args.city]
